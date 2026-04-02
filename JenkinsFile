@@ -16,13 +16,13 @@ pipeline {
 
         stage('Build Image') {
             steps {
-                sh 'docker build -t jenkinsLab2 .'
+                sh 'docker build -t jenkinslab2 .'
             }
         }
 
         stage('Run Container') {
             steps {
-                sh 'docker run -d -p 80:80 --name test-container jenkinsLab2'
+                sh 'docker run -d -p 80:80 --name test-container jenkinslab2'
             }
         }
 
