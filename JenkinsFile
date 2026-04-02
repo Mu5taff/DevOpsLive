@@ -1,0 +1,50 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub')
+    }
+
+    stages {
+
+        stage('Clean') {
+            steps {
+                sh 'docker rm -f test-container || true'
+                sh 'docker system prune -f'
+            }
+        }
+
+        stage('Build Image') {
+            steps {
+                sh 'docker build -t jenkinsLab2 .'
+            }
+        }
+
+        stage('Run Container') {
+            steps {
+                sh 'docker run -d -p 80:80 --name test-container jenkinsLab2'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                sh 'pip install requests'
+                sh 'python test_app.py'
+            }
+        }
+
+        stage('push') {
+            steps {
+                sh "echo \$DOCKERHUB_CREDENTIALS_PSW | docker login -u \$DOCKERHUB_CREDENTIALS_USR --password-stdin"
+                sh "docker tag flask-app:latest mu5tafff/flask-app:latest"
+                sh "docker push mu5tafff/flask-app:latest"
+            }
+        }
+    }
+
+    post {
+        always {
+            sh 'docker rm -f test-container || true'
+        }
+    }
+}
